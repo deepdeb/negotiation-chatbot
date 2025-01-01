@@ -20,6 +20,9 @@ responses = {
     "ask_for_offer": ["Please provide your offer, and let's see if we can make a deal."]
 }
 
+# Global conversation history (user and bot messages)
+conversation_history = []
+
 def process_user_input(user_input):
     global current_price
 
@@ -33,30 +36,45 @@ def process_user_input(user_input):
         offer = numbers[0]
         
         if offer < 60:
-            return random.choice(responses["price_too_low"])
+            bot_response = random.choice(responses["price_too_low"])
         elif 60 <= offer < 80:
-            return random.choice(responses["price_middle_ground"])
+            bot_response = random.choice(responses["price_middle_ground"])
         elif offer >= 80:
             current_price = offer  # Update the current price if the user offers higher than or equal to 80
-            return random.choice(responses["final_offer"])
-    elif "accept" in user_input.lower() or "deal" in user_input.lower() or "great" in user_input.lower():
-        return "Great! We have a deal."
+            bot_response = random.choice(responses["final_offer"])
+    elif "accept" in user_input.lower() or "deal" in user_input.lower() or "great" in user_input.lower() or "agree" in user_input.lower():
+        bot_response = "Great! We have a deal."
     elif "no" in user_input.lower() or "reject" in user_input.lower():
         # Reject the offer and try a lower price
         current_price -= random.randint(10, 20)
-        return random.choice(responses["rejected_offer"])
+        bot_response = random.choice(responses["rejected_offer"])
     elif "end" in user_input.lower() or "quit" in user_input.lower():
-        return random.choice(responses["negotiation_end"])
+        bot_response = random.choice(responses["negotiation_end"])
     else:
-        return random.choice(responses["ask_for_offer"])
+        bot_response = random.choice(responses["ask_for_offer"])
+
+    # Append the user input and bot response to the conversation history
+    conversation_history.append({"user": user_input, "bot": bot_response})
+
+    return bot_response
 
 @app.route("/", methods=["GET", "POST"])
 def home():
+    global conversation_history
+
+    if request.method == "GET":
+        conversation_history = []
+
     if request.method == "POST":
         user_input = request.form["user_input"]
         bot_response = process_user_input(user_input)
-        return render_template("index.html", user_input=user_input, bot_response=bot_response)
-    return render_template("index.html", user_input="", bot_response="")
+        return render_template("index.html", conversation_history=conversation_history)
+
+    if not conversation_history:
+        greeting_message = random.choice(responses["greeting"])
+        conversation_history.append({"bot": greeting_message})
+
+    return render_template("index.html", conversation_history=conversation_history)
 
 if __name__ == "__main__":
     app.run(debug=True)

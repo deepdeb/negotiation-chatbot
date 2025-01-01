@@ -1,77 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Price Negotiator Chatbot</title>
+    <title>Price Negotiator Bot</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        .container {
-            width: 80%;
-            margin: 0 auto;
-            max-width: 600px;
+        .chat-box {
+            width: 500px;
+            margin: auto;
             padding: 20px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .chatbox {
-            max-height: 400px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #f9f9f9;
             border: 1px solid #ddd;
-            border-radius: 8px;
         }
-        .message {
-            margin: 5px 0;
-            padding: 8px;
-            background-color: #efefef;
-            border-radius: 4px;
+
+        .title {
+            display: flex;
+            justify-content: center;
         }
-        .user-message {
-            background-color: #d0f7d6;
+
+        .user-msg {
+            color: blue;
         }
-        .bot-message {
-            background-color: #f1f1f1;
+
+        .bot-msg {
+            color: green;
         }
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
+
+        .input-send {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
         }
     </style>
+    <link rel="stylesheet" href="{{url_for('static', filename='bootstrap.min.css')}}">
 </head>
+
 <body>
-    <div class="container">
-        <h1>Price Negotiator Chatbot</h1>
-        <div class="chatbox">
-            <div class="message bot-message">
-                Welcome! Let's negotiate a price. What's your offer?
-            </div>
-            {% if user_input %}
-                <div class="message user-message">
-                    You: {{ user_input }}
-                </div>
-            {% endif %}
-            {% if bot_response %}
-                <div class="message bot-message">
-                    Bot: {{ bot_response }}
-                </div>
-            {% endif %}
+    <nav class="navbar navbar-light bg-light d-flex justify-content-center">
+        <span class="navbar-brand h1">Price Negotiator Bot</span>
+    </nav>
+    <div class="chat-box mt-5">
+        <!-- Display conversation history -->
+        <div id="chat-history">
+            {% for message in conversation_history %}
+                {% if message.user %}
+                    <p class="user-msg"><strong>You:</strong> {{ message.user }}</p>
+                {% endif %}
+                <p class="bot-msg"><strong>Bot:</strong> {{ message.bot }}</p>
+            {% endfor %}
         </div>
-        <form action="/" method="post">
-            <input type="text" name="user_input" placeholder="Type your message here" required />
-            <button type="submit">Send</button>
+
+        <!-- Form for user input -->
+        <form method="POST">
+            <div class="input-send form-group">
+                <input type="text" name="user_input" class="form-control" placeholder="Enter your offer..." required>
+                <button type="submit" class="btn btn-primary">Send</button>
+            </div>
         </form>
     </div>
 </body>
+
 </html>
